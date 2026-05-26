@@ -1,0 +1,106 @@
+# =========================================================
+# Caddyfile — shared reverse proxy
+# Всі домени в одному місці. Caddy сам отримує TLS Let's Encrypt.
+#
+# Мережа: зовнішня Docker network "web"
+# Контейнери: valentyna_app · bloom_api · bloom_admin · bloom_platformadmin
+#
+# Деплой: docker compose restart caddy  (НЕ down/up — щоб не втратити сертифікати)
+# =========================================================
+
+# ── Публічний сайт перукарні ─────────────────────────────────────────────────
+valentynah.com, www.valentynah.com {
+
+    @www host www.valentynah.com
+    redir @www https://valentynah.com{uri} permanent
+
+    reverse_proxy valentyna_app:8080
+    encode gzip zstd
+
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        X-Content-Type-Options    "nosniff"
+        X-Frame-Options           "SAMEORIGIN"
+        Referrer-Policy           "strict-origin-when-cross-origin"
+        Permissions-Policy        "geolocation=(), microphone=(), camera=()"
+        -Server
+    }
+
+    log {
+        output file /data/logs/valentynah.log {
+            roll_size 10mb
+            roll_keep 5
+        }
+        format json
+    }
+}
+
+# ── Bloom CRM — Tenant Admin ─────────────────────────────────────────────────
+crm.valentynah.com {
+
+    reverse_proxy bloom_admin:8080
+    encode gzip zstd
+
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        X-Content-Type-Options    "nosniff"
+        X-Frame-Options           "SAMEORIGIN"
+        Referrer-Policy           "strict-origin-when-cross-origin"
+        -Server
+    }
+
+    log {
+        output file /data/logs/crm.log {
+            roll_size 10mb
+            roll_keep 5
+        }
+        format json
+    }
+}
+
+# ── Bloom API ────────────────────────────────────────────────────────────────
+api.valentynah.com {
+
+    reverse_proxy bloom_api:8080
+    encode gzip zstd
+
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        X-Content-Type-Options    "nosniff"
+        Referrer-Policy           "strict-origin-when-cross-origin"
+        -Server
+    }
+
+    log {
+        output file /data/logs/api.log {
+            roll_size 10mb
+            roll_keep 5
+        }
+        format json
+    }
+}
+
+# ── Bloom Platform Admin (команда Bloom) ────────────────────────────────────
+# X-Frame-Options: DENY — анти-clickjacking для критичної панелі
+platform.valentynah.com {
+
+    reverse_proxy bloom_platformadmin:8080
+    encode gzip zstd
+
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        X-Content-Type-Options    "nosniff"
+        X-Frame-Options           "DENY"
+        Referrer-Policy           "no-referrer"
+        Permissions-Policy        "geolocation=(), microphone=(), camera=()"
+        -Server
+    }
+
+    log {
+        output file /data/logs/platform.log {
+            roll_size 10mb
+            roll_keep 5
+        }
+        format json
+    }
+}

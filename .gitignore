@@ -1,0 +1,7 @@
+# Caddy runtime data (mapped as volumes, not committed)
+data/
+config/
+
+# OS
+.DS_Store
+Thumbs.db
