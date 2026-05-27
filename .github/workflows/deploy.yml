@@ -1,0 +1,29 @@
+name: Deploy Caddy
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:   # ручний запуск з GitHub UI
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.HETZNER_SSH_KEY }}
+
+      - name: Add Hetzner to known_hosts
+        run: ssh-keyscan -H ${{ secrets.HETZNER_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Deploy — git pull + restart Caddy
+        run: |
+          ssh ${{ secrets.HETZNER_USER }}@${{ secrets.HETZNER_HOST }} << 'EOF'
+            set -e
+            cd /opt/caddy
+            git pull
+            docker compose restart caddy
+            echo "Caddy restarted OK"
+          EOF
