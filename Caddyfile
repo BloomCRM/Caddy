@@ -104,3 +104,33 @@ platform.valentynah.com {
         format json
     }
 }
+
+# ── Bloom SaaS — bloomcrm.net (path layout, no subdomains) ───────────────────
+bloomcrm.net, www.bloomcrm.net {
+    @www host www.bloomcrm.net
+    redir @www https://bloomcrm.net{uri} permanent
+
+    handle_path /api/* {
+        reverse_proxy bloom_api:8080
+    }
+    handle /app/* {
+        reverse_proxy bloom_admin:8080
+    }
+    handle /platform/* {
+        reverse_proxy bloom_platformadmin:8080
+    }
+    handle {
+        root * /srv/landing
+        file_server
+        try_files {path} /index.html
+    }
+
+    encode gzip zstd
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        X-Content-Type-Options "nosniff"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        -Server
+    }
+    log { output file /data/logs/bloomcrm.log { roll_size 10mb roll_keep 5 } format json }
+}
