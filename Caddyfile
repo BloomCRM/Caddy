@@ -113,6 +113,13 @@ bloomcrm.net, www.bloomcrm.net {
     handle_path /api/* {
         reverse_proxy bloom_api:8080
     }
+    # Bare /app and /platform don't match the /*-wildcard handles → redirect to the slash form.
+    handle /app {
+        redir * /app/ 308
+    }
+    handle /platform {
+        redir * /platform/ 308
+    }
     handle /app/* {
         reverse_proxy bloom_admin:8080
     }
