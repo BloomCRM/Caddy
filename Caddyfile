@@ -139,5 +139,11 @@ bloomcrm.net, www.bloomcrm.net {
         Referrer-Policy "strict-origin-when-cross-origin"
         -Server
     }
-    log { output file /data/logs/bloomcrm.log { roll_size 10mb roll_keep 5 } format json }
+    log {
+        output file /data/logs/bloomcrm.log {
+            roll_size 10mb
+            roll_keep 5
+        }
+        format json
+    }
 }
