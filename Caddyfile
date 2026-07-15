@@ -59,10 +59,9 @@ bloomcrm.net, www.bloomcrm.net {
     handle /platform/* {
         reverse_proxy bloom_platformadmin:8080
     }
+    # / → Bloom.Landing (was: static file_server from /srv/landing until 15.07.2026)
     handle {
-        root * /srv/landing
-        file_server
-        try_files {path} /index.html
+        reverse_proxy bloom_landing:8080
     }
 
     encode gzip zstd
