@@ -76,6 +76,12 @@ bloomcrm.net, www.bloomcrm.net {
             roll_size 10mb
             roll_keep 5
         }
-        format json
+        # A manage-booking link carries a live credential in its path; the log keeps the request, not the key.
+        format filter {
+            wrap json
+            fields {
+                request>uri regexp "/manage/t/[^/?#]+" "/manage/t/***"
+            }
+        }
     }
 }
