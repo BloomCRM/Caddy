@@ -59,6 +59,10 @@ bloomcrm.net, www.bloomcrm.net {
     handle /platform/* {
         reverse_proxy bloom_platformadmin:8080
     }
+    # Short manage link from emails and SMS; Bloom.Api owns the route, so the /m prefix is kept.
+    handle /m/* {
+        reverse_proxy bloom_api:8080
+    }
     # / → Bloom.Landing (was: static file_server from /srv/landing until 15.07.2026)
     handle {
         reverse_proxy bloom_landing:8080
@@ -80,7 +84,7 @@ bloomcrm.net, www.bloomcrm.net {
         format filter {
             wrap json
             fields {
-                request>uri regexp "/manage/t/[^/?#]+" "/manage/t/***"
+                request>uri regexp "(^/m|/manage/t)/[^/?#]+" "${1}/***"
             }
         }
     }
